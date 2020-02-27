@@ -240,6 +240,26 @@ class GetUserMediaImpl {
         }
     }
 
+    boolean getFlash(String id){
+        VideoCapturer videoCapturer = mVideoCapturers.get(id);
+        if (videoCapturer != null) {
+	     CameraVideoCapturer cameraVideoCapturer
+                 = (CameraVideoCapturer) videoCapturer;
+             return cameraVideoCapturer.getFlash();
+        }else{
+            return false;
+        }
+    }
+
+    void setFlash(String id, boolean enable){
+        VideoCapturer videoCapturer = mVideoCapturers.get(id);
+        if (videoCapturer != null) {
+            CameraVideoCapturer cameraVideoCapturer
+                 = (CameraVideoCapturer) videoCapturer;
+            cameraVideoCapturer.setFlash(enable);
+        }
+    }
+
     /**
      * Application/library-specific private members of local
      * {@code MediaStreamTrack}s created by {@code GetUserMediaImpl}.

@@ -979,4 +979,24 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             pco.dataChannelSend(dataChannelId, data, type);
         }
     }
+
+    @ReactMethod
+    public void mediaStreamTrackGetFlash(final String id, Promise promise) {
+        // Check for a camera flashlight
+        MediaStreamTrack track = localTracks.get(id);
+        if (track != null) {
+            promise.resolve(getUserMediaImpl.getFlash(id));
+        }else{
+            promise.reject("failed");
+        }
+    }
+
+    @ReactMethod
+    public void mediaStreamTrackSetFlash(final String id, boolean enable) {
+        // Enable / disable camera flashlight
+        MediaStreamTrack track = localTracks.get(id);
+        if (track != null) {
+            getUserMediaImpl.setFlash(id, enable);
+        }
+    }
 }
