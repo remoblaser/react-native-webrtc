@@ -46,7 +46,7 @@ interface CameraSession {
    */
   void stop();
 
-  public void setFlash(boolean enable);
+  void setFlash(boolean enable);
 
   static int getDeviceOrientation(Context context) {
     final WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

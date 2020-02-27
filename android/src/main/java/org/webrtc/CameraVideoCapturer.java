@@ -23,7 +23,7 @@ public interface CameraVideoCapturer extends VideoCapturer {
    * Camera events handler - can be used to be notifed about camera events. The
    * callbacks are executed from an arbitrary thread.
    */
-  public void setFlash(boolean enable);
+  void setFlash(boolean enable);
 
   public interface CameraEventsHandler {
     // Camera error handler - invoked when camera can not be opened

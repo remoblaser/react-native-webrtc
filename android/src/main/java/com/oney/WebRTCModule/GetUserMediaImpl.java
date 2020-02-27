@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.webrtc.*;
-import org.webrtc.VideoCapturer;
 
 /**
  * The implementation of {@code getUserMedia} extracted into a separate file in
