@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.webrtc.*;
+import org.webrtc.VideoCapturer;
 
 /**
  * The implementation of {@code getUserMedia} extracted into a separate file in
@@ -31,8 +32,8 @@ class GetUserMediaImpl {
 
     /**
      * The application/library-specific private members of local
-     * {@link MediaStreamTrack}s created by {@code GetUserMediaImpl} mapped by
-     * track ID.
+     * {@link MediaStreamTrack}s created by {@code GetUserMediaImpl} mapped by track
+     * ID.
      */
     private final Map<String, TrackPrivate> tracks = new HashMap<>();
 
@@ -47,7 +48,8 @@ class GetUserMediaImpl {
         try {
             camera2supported = Camera2Enumerator.isSupported(reactContext);
         } catch (Throwable tr) {
-            // Some devices will crash here with: Fatal Exception: java.lang.AssertionError: Supported FPS ranges cannot be null.
+            // Some devices will crash here with: Fatal Exception: java.lang.AssertionError:
+            // Supported FPS ranges cannot be null.
             // Make sure we don't.
             Log.w(TAG, "Error checking for Camera2 API support.", tr);
         }
@@ -61,6 +63,16 @@ class GetUserMediaImpl {
         }
     }
 
+    void setFlash(String id, boolean enable) {
+
+        TrackPrivate track = tracks.get(id);
+        if (track != null && track.videoCaptureController != null) {
+            CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) track.videoCaptureController
+                    .getVideoCapturer();
+            cameraVideoCapturer.setFlash(enable);
+        }
+    }
+
     private AudioTrack createAudioTrack(ReadableMap constraints) {
         ReadableMap audioConstraintsMap = constraints.getMap("audio");
 
@@ -70,9 +82,7 @@ class GetUserMediaImpl {
         PeerConnectionFactory pcFactory = webRTCModule.mFactory;
         AudioSource audioSource = pcFactory.createAudioSource(webRTCModule.constraintsForOptions(audioConstraintsMap));
         AudioTrack track = pcFactory.createAudioTrack(id, audioSource);
-        tracks.put(
-            id,
-            new TrackPrivate(track, audioSource, /* videoCapturer */ null));
+        tracks.put(id, new TrackPrivate(track, audioSource, /* videoCapturer */ null));
 
         return track;
     }
@@ -82,8 +92,8 @@ class GetUserMediaImpl {
 
         Log.d(TAG, "getUserMedia(video): " + videoConstraintsMap);
 
-        VideoCaptureController videoCaptureController
-            = new VideoCaptureController(cameraEnumerator, videoConstraintsMap);
+        VideoCaptureController videoCaptureController = new VideoCaptureController(cameraEnumerator,
+                videoConstraintsMap);
         VideoCapturer videoCapturer = videoCaptureController.getVideoCapturer();
         if (videoCapturer == null) {
             return null;
@@ -91,8 +101,7 @@ class GetUserMediaImpl {
 
         PeerConnectionFactory pcFactory = webRTCModule.mFactory;
         EglBase.Context eglContext = EglUtils.getRootEglBaseContext();
-        SurfaceTextureHelper surfaceTextureHelper =
-            SurfaceTextureHelper.create("CaptureThread", eglContext);
+        SurfaceTextureHelper surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglContext);
         VideoSource videoSource = pcFactory.createVideoSource(videoCapturer.isScreencast());
         videoCapturer.initialize(surfaceTextureHelper, reactContext, videoSource.getCapturerObserver());
 
@@ -111,7 +120,7 @@ class GetUserMediaImpl {
         WritableArray array = Arguments.createArray();
         String[] devices = cameraEnumerator.getDeviceNames();
 
-        for(int i = 0; i < devices.length; ++i) {
+        for (int i = 0; i < devices.length; ++i) {
             String deviceName = devices[i];
             boolean isFrontFacing;
             try {
@@ -149,19 +158,17 @@ class GetUserMediaImpl {
     /**
      * Implements {@code getUserMedia}. Note that at this point constraints have
      * been normalized and permissions have been granted. The constraints only
-     * contain keys for which permissions have already been granted, that is,
-     * if audio permission was not granted, there will be no "audio" key in
-     * the constraints map.
+     * contain keys for which permissions have already been granted, that is, if
+     * audio permission was not granted, there will be no "audio" key in the
+     * constraints map.
      */
-    void getUserMedia(
-            final ReadableMap constraints,
-            final Callback successCallback,
-            final Callback errorCallback) {
+    void getUserMedia(final ReadableMap constraints, final Callback successCallback, final Callback errorCallback) {
         // TODO: change getUserMedia constraints format to support new syntax
-        //   constraint format seems changed, and there is no mandatory any more.
-        //   and has a new syntax/attrs to specify resolution
-        //   should change `parseConstraints()` according
-        //   see: https://www.w3.org/TR/mediacapture-streams/#idl-def-MediaTrackConstraints
+        // constraint format seems changed, and there is no mandatory any more.
+        // and has a new syntax/attrs to specify resolution
+        // should change `parseConstraints()` according
+        // see:
+        // https://www.w3.org/TR/mediacapture-streams/#idl-def-MediaTrackConstraints
 
         AudioTrack audioTrack = null;
         VideoTrack videoTrack = null;
@@ -175,18 +182,17 @@ class GetUserMediaImpl {
         }
 
         if (audioTrack == null && videoTrack == null) {
-             // Fail with DOMException with name AbortError as per:
-             // https://www.w3.org/TR/mediacapture-streams/#dom-mediadevices-getusermedia
-             errorCallback.invoke("DOMException","AbortError");
-             return;
+            // Fail with DOMException with name AbortError as per:
+            // https://www.w3.org/TR/mediacapture-streams/#dom-mediadevices-getusermedia
+            errorCallback.invoke("DOMException", "AbortError");
+            return;
         }
 
         String streamId = UUID.randomUUID().toString();
-        MediaStream mediaStream
-            = webRTCModule.mFactory.createLocalMediaStream(streamId);
+        MediaStream mediaStream = webRTCModule.mFactory.createLocalMediaStream(streamId);
         WritableArray tracks = Arguments.createArray();
 
-        for (MediaStreamTrack track : new MediaStreamTrack[]{audioTrack, videoTrack}) {
+        for (MediaStreamTrack track : new MediaStreamTrack[] { audioTrack, videoTrack }) {
             if (track == null) {
                 continue;
             }
@@ -240,26 +246,6 @@ class GetUserMediaImpl {
         }
     }
 
-    boolean getFlash(String id){
-        VideoCapturer videoCapturer = mVideoCapturers.get(id);
-        if (videoCapturer != null) {
-	     CameraVideoCapturer cameraVideoCapturer
-                 = (CameraVideoCapturer) videoCapturer;
-             return cameraVideoCapturer.getFlash();
-        }else{
-            return false;
-        }
-    }
-
-    void setFlash(String id, boolean enable){
-        VideoCapturer videoCapturer = mVideoCapturers.get(id);
-        if (videoCapturer != null) {
-            CameraVideoCapturer cameraVideoCapturer
-                 = (CameraVideoCapturer) videoCapturer;
-            cameraVideoCapturer.setFlash(enable);
-        }
-    }
-
     /**
      * Application/library-specific private members of local
      * {@code MediaStreamTrack}s created by {@code GetUserMediaImpl}.
@@ -273,8 +259,8 @@ class GetUserMediaImpl {
         public final MediaStreamTrack track;
 
         /**
-         * The {@code VideoCapturer} from which {@link #mediaSource} was created
-         * if {@link #track} is a {@link VideoTrack}.
+         * The {@code VideoCapturer} from which {@link #mediaSource} was created if
+         * {@link #track} is a {@link VideoTrack}.
          */
         public final VideoCaptureController videoCaptureController;
 
@@ -287,15 +273,14 @@ class GetUserMediaImpl {
          * Initializes a new {@code TrackPrivate} instance.
          *
          * @param track
-         * @param mediaSource the {@code MediaSource} from which the specified
-         * {@code code} was created
-         * @param videoCaptureController the {@code VideoCaptureController} from which the
-         * specified {@code mediaSource} was created if the specified
-         * {@code track} is a {@link VideoTrack}
+         * @param mediaSource            the {@code MediaSource} from which the
+         *                               specified {@code code} was created
+         * @param videoCaptureController the {@code VideoCaptureController} from which
+         *                               the specified {@code mediaSource} was created
+         *                               if the specified {@code track} is a
+         *                               {@link VideoTrack}
          */
-        public TrackPrivate(
-                MediaStreamTrack track,
-                MediaSource mediaSource,
+        public TrackPrivate(MediaStreamTrack track, MediaSource mediaSource,
                 VideoCaptureController videoCaptureController) {
             this.track = track;
             this.mediaSource = mediaSource;
