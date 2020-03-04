@@ -15,14 +15,13 @@ public class VideoCaptureController {
     /**
      * The {@link Log} tag with which {@code VideoCaptureController} is to log.
      */
-    private static final String TAG
-        = VideoCaptureController.class.getSimpleName();
+    private static final String TAG = VideoCaptureController.class.getSimpleName();
 
     private boolean isFrontFacing;
 
     /**
-     * Values for width, height and fps (respectively) which will be
-     * used to open the camera at.
+     * Values for width, height and fps (respectively) which will be used to open
+     * the camera at.
      */
     private final int width;
     private final int height;
@@ -32,12 +31,11 @@ public class VideoCaptureController {
 
     /**
      * The {@link CameraEventsHandler} used with
-     * {@link CameraEnumerator#createCapturer}. Cached because the
-     * implementation does not do anything but logging unspecific to the camera
-     * device's name anyway.
+     * {@link CameraEnumerator#createCapturer}. Cached because the implementation
+     * does not do anything but logging unspecific to the camera device's name
+     * anyway.
      */
-    private final CameraEventsHandler cameraEventsHandler
-        = new CameraEventsHandler();
+    private final CameraEventsHandler cameraEventsHandler = new CameraEventsHandler();
 
     /**
      * {@link VideoCapturer} which this controller manages.
@@ -121,10 +119,11 @@ public class VideoCaptureController {
     }
 
     /**
-     * Helper function which tries to switch cameras until the desired facing mode is found.
+     * Helper function which tries to switch cameras until the desired facing mode
+     * is found.
      *
      * @param desiredFrontFacing - The desired front facing value.
-     * @param tries - How many times to try switching.
+     * @param tries              - How many times to try switching.
      */
     private void switchCamera(boolean desiredFrontFacing, int tries) {
         CameraVideoCapturer capturer = (CameraVideoCapturer) videoCapturer;
@@ -133,7 +132,7 @@ public class VideoCaptureController {
             @Override
             public void onCameraSwitchDone(boolean b) {
                 if (b != desiredFrontFacing) {
-                    int newTries = tries-1;
+                    int newTries = tries - 1;
                     if (newTries > 0) {
                         switchCamera(desiredFrontFacing, newTries);
                     }
@@ -153,14 +152,14 @@ public class VideoCaptureController {
      * Constructs a new {@code VideoCapturer} instance attempting to satisfy
      * specific constraints.
      *
-     * @param deviceId the ID of the requested video device. If not
-     * {@code null} and a {@code VideoCapturer} can be created for it, then
-     * {@code facingMode} is ignored.
+     * @param deviceId   the ID of the requested video device. If not {@code null}
+     *                   and a {@code VideoCapturer} can be created for it, then
+     *                   {@code facingMode} is ignored.
      * @param facingMode the facing of the requested video source such as
-     * {@code user} and {@code environment}. If {@code null}, "user" is
-     * presumed.
+     *                   {@code user} and {@code environment}. If {@code null},
+     *                   "user" is presumed.
      * @return a {@code VideoCapturer} satisfying the {@code facingMode} or
-     * {@code deviceId} constraint
+     *         {@code deviceId} constraint
      */
     private VideoCapturer createVideoCapturer(String deviceId, String facingMode) {
         String[] deviceNames = cameraEnumerator.getDeviceNames();
@@ -170,8 +169,7 @@ public class VideoCaptureController {
         if (deviceId != null) {
             for (String name : deviceNames) {
                 if (name.equals(deviceId)) {
-                    VideoCapturer videoCapturer
-                        = cameraEnumerator.createCapturer(name, cameraEventsHandler);
+                    VideoCapturer videoCapturer = cameraEnumerator.createCapturer(name, cameraEventsHandler);
                     String message = "Create user-specified camera " + name;
                     if (videoCapturer != null) {
                         Log.d(TAG, message + " succeeded");
@@ -187,8 +185,7 @@ public class VideoCaptureController {
         }
 
         // Otherwise, use facingMode (defaulting to front/user facing).
-        final boolean isFrontFacing
-            = facingMode == null || !facingMode.equals("environment");
+        final boolean isFrontFacing = facingMode == null || !facingMode.equals("environment");
         for (String name : deviceNames) {
             if (failedDevices.contains(name)) {
                 continue;
@@ -199,15 +196,11 @@ public class VideoCaptureController {
                     continue;
                 }
             } catch (Exception e) {
-                Log.e(
-                    TAG,
-                    "Failed to check the facing mode of camera " + name,
-                    e);
+                Log.e(TAG, "Failed to check the facing mode of camera " + name, e);
                 failedDevices.add(name);
                 continue;
             }
-            VideoCapturer videoCapturer
-                = cameraEnumerator.createCapturer(name, cameraEventsHandler);
+            VideoCapturer videoCapturer = cameraEnumerator.createCapturer(name, cameraEventsHandler);
             String message = "Create camera " + name;
             if (videoCapturer != null) {
                 Log.d(TAG, message + " succeeded");
@@ -222,8 +215,7 @@ public class VideoCaptureController {
         // Fallback to any available camera.
         for (String name : deviceNames) {
             if (!failedDevices.contains(name)) {
-                VideoCapturer videoCapturer
-                    = cameraEnumerator.createCapturer(name, cameraEventsHandler);
+                VideoCapturer videoCapturer = cameraEnumerator.createCapturer(name, cameraEventsHandler);
                 String message = "Create fallback camera " + name;
                 if (videoCapturer != null) {
                     Log.d(TAG, message + " succeeded");

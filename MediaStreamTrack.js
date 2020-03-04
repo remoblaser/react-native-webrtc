@@ -1,28 +1,28 @@
-"use strict";
+'use strict';
 
-import { NativeModules } from "react-native";
-import EventTarget from "event-target-shim";
-import MediaStreamErrorEvent from "./MediaStreamErrorEvent";
+import { NativeModules } from 'react-native';
+import EventTarget from 'event-target-shim';
+import MediaStreamErrorEvent from './MediaStreamErrorEvent';
 
-import type MediaStreamError from "./MediaStreamError";
+import type MediaStreamError from './MediaStreamError';
 
 const { WebRTCModule } = NativeModules;
 
 const MEDIA_STREAM_TRACK_EVENTS = [
-  "ended",
-  "mute",
-  "unmute",
+  'ended',
+  'mute',
+  'unmute',
   // see: https://www.w3.org/TR/mediacapture-streams/#constrainable-interface
-  "overconstrained"
+  'overconstrained',
 ];
 
-type MediaStreamTrackState = "live" | "ended";
+type MediaStreamTrackState = 'live' | 'ended';
 
 type SourceInfo = {
   id: string,
   label: string,
   facing: string,
-  kind: string
+  kind: string,
 };
 
 class MediaStreamTrack extends EventTarget(MEDIA_STREAM_TRACK_EVENTS) {
@@ -53,9 +53,9 @@ class MediaStreamTrack extends EventTarget(MEDIA_STREAM_TRACK_EVENTS) {
     this.readonly = true; // how to decide?
     this.remote = info.remote;
     this.readyState =
-      _readyState === "initializing" || _readyState === "live"
-        ? "live"
-        : "ended";
+      _readyState === 'initializing' || _readyState === 'live'
+        ? 'live'
+        : 'ended';
   }
 
   get enabled(): boolean {
@@ -73,7 +73,7 @@ class MediaStreamTrack extends EventTarget(MEDIA_STREAM_TRACK_EVENTS) {
 
   stop() {
     WebRTCModule.mediaStreamTrackSetEnabled(this.id, false);
-    this.readyState = "ended";
+    this.readyState = 'ended';
     // TODO: save some stopped flag?
   }
 
@@ -86,58 +86,40 @@ class MediaStreamTrack extends EventTarget(MEDIA_STREAM_TRACK_EVENTS) {
    */
   _switchCamera() {
     if (this.remote) {
-      throw new Error("Not implemented for remote tracks");
+      throw new Error('Not implemented for remote tracks');
     }
-    if (this.kind !== "video") {
-      throw new Error("Only implemented for video tracks");
+    if (this.kind !== 'video') {
+      throw new Error('Only implemented for video tracks');
     }
     WebRTCModule.mediaStreamTrackSwitchCamera(this.id);
   }
 
   applyConstraints() {
-    throw new Error("Not implemented.");
+    throw new Error('Not implemented.');
   }
 
   clone() {
-    throw new Error("Not implemented.");
+    throw new Error('Not implemented.');
   }
 
   getCapabilities() {
-    throw new Error("Not implemented.");
+    throw new Error('Not implemented.');
   }
 
   getConstraints() {
-    throw new Error("Not implemented.");
+    throw new Error('Not implemented.');
   }
 
   getSettings() {
-    throw new Error("Not implemented.");
+    throw new Error('Not implemented.');
   }
 
-  /**
-   * Custom API for get camera flashlight avaiable
-   */
-
-  async _getFlash() {
-    if (this.remote) {
-      throw new Error("Not implemented for remote tracks");
-    }
-    if (this.kind !== "video") {
-      throw new Error("Only implemented for video tracks");
-    }
-    let result = await WebRTCModule.mediaStreamTrackGetFlash(this.id);
-    return WebRTCModule.mediaStreamTrackGetFlash(this.id);
-  }
-
-  /**
-   * Custom API for open camera flashlight
-   */
   _setFlash(enable) {
     if (this.remote) {
-      throw new Error("Not implemented for remote tracks");
+      throw new Error('Not implemented for remote tracks');
     }
-    if (this.kind !== "video") {
-      throw new Error("Only implemented for video tracks");
+    if (this.kind !== 'video') {
+      throw new Error('Only implemented for video tracks');
     }
     WebRTCModule.mediaStreamTrackSetFlash(this.id, enable);
   }
