@@ -1,9 +1,12 @@
 package com.oney.WebRTCModule;
 
+import android.support.annotation.Nullable;
+
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 
+import java.util.Map;
 
 public class RTCVideoViewManager extends SimpleViewManager<WebRTCView> {
   private static final String REACT_CLASS = "RTCVideoView";
@@ -17,6 +20,15 @@ public class RTCVideoViewManager extends SimpleViewManager<WebRTCView> {
   public WebRTCView createViewInstance(ThemedReactContext context) {
     return new WebRTCView(context);
   }
+  
+  @Override
+  public @Nullable Map getExportedCustomDirectEventTypeConstants() {
+    return MapBuilder.of(
+            "frameLayout",
+            MapBuilder.of("registrationName", "onFrameLayout")
+    );
+  }
+
 
   /**
    * Sets the indicator which determines whether a specific {@link WebRTCView}

@@ -1,18 +1,17 @@
-'use strict';
+"use strict";
 
 import {
   DeviceEventEmitter,
   NativeModules,
-  requireNativeComponent,
-} from 'react-native';
-import PropTypes from 'prop-types';
+  requireNativeComponent
+} from "react-native";
+import PropTypes from "prop-types";
 
-const {WebRTCModule} = NativeModules;
+const { WebRTCModule } = NativeModules;
 
 const RTCView = {
-  name: 'RTCVideoView',
+  name: "RTCVideoView",
   propTypes: {
-
     /**
      * Indicates whether the video specified by {@link #streamURL} should be
      * mirrored during rendering. Commonly, applications choose to mirror the
@@ -26,7 +25,7 @@ const RTCView = {
      * and https://www.w3.org/TR/html5/rendering.html#video-object-fit,
      * resembles the CSS style object-fit.
      */
-    objectFit: PropTypes.oneOf(['contain', 'cover']),
+    objectFit: PropTypes.oneOf(["contain", "cover"]),
 
     streamURL: PropTypes.string,
 
@@ -54,18 +53,21 @@ const RTCView = {
      * video(s) which appear above the remote video(s).
      */
     zOrder: PropTypes.number
-  },
+  }
 };
 
-const View = requireNativeComponent('RTCVideoView', RTCView, {nativeOnly: {
-  testID: true,
-  accessibilityComponentType: true,
-  renderToHardwareTextureAndroid: true,
-  accessibilityLabel: true,
-  accessibilityLiveRegion: true,
-  importantForAccessibility: true,
-  onLayout: true,
-  nativeID: true,
-}});
+const View = requireNativeComponent("RTCVideoView", RTCView, {
+  nativeOnly: {
+    testID: true,
+    accessibilityComponentType: true,
+    renderToHardwareTextureAndroid: true,
+    accessibilityLabel: true,
+    accessibilityLiveRegion: true,
+    importantForAccessibility: true,
+    onLayout: true,
+    onFrameLayout: true,
+    nativeID: true
+  }
+});
 
 export default View;

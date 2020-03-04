@@ -9,6 +9,7 @@
 #import <objc/runtime.h>
 
 #import <React/RCTLog.h>
+#import <React/RCTView.h>
 #import <WebRTC/RTCEAGLVideoView.h>
 #import <WebRTC/RTCMediaStream.h>
 #import <WebRTC/RTCMTLVideoView.h>
@@ -72,6 +73,8 @@ typedef NS_ENUM(NSInteger, RTCVideoViewObjectFit) {
  * The {@link RTCVideoTrack}, if any, which this instance renders.
  */
 @property (nonatomic, strong) RTCVideoTrack *videoTrack;
+
+@property (nonatomic, copy) RCTDirectEventBlock onFrameLayout;
 
 /**
  * Reference to the main WebRTC RN module.
@@ -284,6 +287,13 @@ typedef NS_ENUM(NSInteger, RTCVideoViewObjectFit) {
 - (void)videoView:(id<RTCVideoRenderer>)videoView didChangeVideoSize:(CGSize)size {
   if (videoView == self.videoView) {
     _videoSize = size;
+    if (_onFrameLayout) {
+      _onFrameLayout(@{
+        @"videoWidth" : @(size.width),
+        @"videoHeight" : @(size.height),
+        @"rotation" : @0
+      });
+    }
     [self setNeedsLayout];
   }
 }
@@ -350,5 +360,7 @@ RCT_CUSTOM_VIEW_PROPERTY(streamURL, NSString *, RTCVideoView) {
 {
     return NO;
 }
+
+RCT_EXPORT_VIEW_PROPERTY(onFrameLayout, RCTDirectEventBlock)
 
 @end
